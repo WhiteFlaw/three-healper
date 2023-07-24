@@ -1,0 +1,30 @@
+{
+  "name": "three-helper",
+  "version": "1.0.0",
+  "description": "three.js二次封装",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WhiteFlaw/three-helper.git"
+  },
+  "keywords": [
+    "[typescript",
+    "three.js",
+    "vue]"
+  ],
+  "author": "WhiteFlaw",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/WhiteFlaw/three-helper/issues"
+  },
+  "homepage": "https://github.com/WhiteFlaw/three-helper#readme",
+  "dependencies": {
+    "@types/three": "^0.154.0",
+    "dat.gui": "^0.7.9",
+    "gsap": "^3.12.2",
+    "typescript": "^5.1.6"
+  }
+}
