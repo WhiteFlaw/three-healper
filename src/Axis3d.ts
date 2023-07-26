@@ -1,15 +1,10 @@
 import * as THREE from 'three';
-import { SpriteText } from './SpriteText.js';
+import { SpriteText } from './SpriteText';
 import { Bar3dInterface, Bar3dContructorInterface } from './interface/Axis';
-
-let dataExamples: string[][] = [
-    ["0%", "20%", "40%", "60%", "80%", "100%"],
-    ["line0", "line1", "line2", "line3", "line4"]
-]
 
 export const Axis3d: Bar3dContructorInterface = class Axis3d implements Bar3dInterface {
     mesh: THREE.Group;
-    constructor(category: string[][], bottom: number = 0, left: number = 2, size: THREE.Vector3 = new THREE.Vector3(8, 6, 4)) {
+    constructor(category: string[][], bottom: number, left: number, size: THREE.Vector3) {
         this.mesh = new THREE.Group();
         // 水平面网格
         let gridHelper = new GridHelper(size.x, size.z);
@@ -29,7 +24,7 @@ export const Axis3d: Bar3dContructorInterface = class Axis3d implements Bar3dInt
     }
 
     addAxisLabel(category: string[][], bottom: number, left: number, size: THREE.Vector3): void {
-        const data = category || dataExamples;
+        const data = category;
         data[0].forEach((item, i) => {
             const y = i === 0 ?
                 bottom :

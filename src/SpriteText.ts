@@ -12,12 +12,12 @@ export const SpriteText: SpriteTextContructorInterface = class SpriteText implem
         canvas.width = 1024;
         canvas.height = 1024;
         this.context = canvas.getContext("2d");
+        this.context!.fillStyle = "rgba(90, 90, 90, 0.7)";
+        this.context!.fillRect(0, 256, 1024, 512);
         this.context!.textAlign = "center";
         this.context!.textBaseline = "middle";
         this.context!.font = "bold 200px Arial";
-        this.context!.fillStyle = "rgba(90, 90, 90, 0.7)";
         this.context!.fillStyle = "rgba(255, 255, 255, 1)";
-        this.context!.fillRect(0, 256, 1024, 512);
         this.context!.fillText(text, canvas.width / 2, canvas.height / 2);
 
         let texture = new THREE.CanvasTexture(canvas);

@@ -23,8 +23,8 @@ export const Effect: EffectContructorInterface = class Effect implements EffectI
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
     effectComposer: EffectComposerType;
-    unrealBloomPass: UnrealBloomPassType;
-    groundReflector: ReflectorForSSRPassType;
+    unrealBloomPass?: UnrealBloomPassType;
+    groundReflector?: ReflectorForSSRPassType;
     constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer) {
         this.scene = scene;
         this.camera = camera;

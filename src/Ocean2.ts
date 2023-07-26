@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Water } from "three/examples/jsm/objects/Water2.js";
+import { Water } from "three/examples/jsm/objects/Water2";
 import type { Water as WaterType } from "three/examples/jsm/objects/Water";
 import { Ocean2ContructorInterface, Ocean2Interface } from "./interface/Ocean2";
 
@@ -9,12 +9,12 @@ export const Ocean2: Ocean2ContructorInterface = class Ocean2 implements Ocean2I
     density: number;
     color: number;
     mesh: WaterType;
-    flowTexture: THREE.Texture;
+    flowTexture?: THREE.Texture; // 这种属性的定义在if内或其他情况, 其不一定在实例化后存在, 所以需要标可选参
     constructor(x: number, y: number, density: number, color: number) {
         this.x = x;
         this.y = y;
-        this.density = density;
         this.color = color;
+        this.density = density;
 
         const oceanGeometry = new THREE.PlaneGeometry(x, y);
         this.mesh = new Water(oceanGeometry, {

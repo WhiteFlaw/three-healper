@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { SnowInterface, SnowContructorInterface } from './interface/Snow';
 
-export const Snow: SnowContructorInterface = class Snow implements SnowInterface {
+export const Snow: SnowContructorInterface = class Snow implements SnowInterface { // 雪区规模最好能自定义 颗粒大小自定义
     mesh: THREE.Points;
-    constructor(geometry: THREE.BufferGeometry, color: number, texture: THREE.Texture) {
+    constructor(geometry?: THREE.BufferGeometry, color?: number, texture?: THREE.Texture) {
         const particleGeometry = geometry || new THREE.BufferGeometry();
 
         const count = 3000;
@@ -24,7 +24,7 @@ export const Snow: SnowContructorInterface = class Snow implements SnowInterface
             material.map = texture;
             material.alphaMap = texture;
         }
-        material.size = 0.1;
+        material.size = 0.5;
         material.color.set(0xfff000);
         material.transparent = true;
         material.depthWrite = false;

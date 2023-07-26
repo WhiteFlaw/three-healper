@@ -1,33 +1,33 @@
 import gsap from 'gsap';
 import * as dat from "dat.gui";
 import * as THREE from 'three';
+import Stats from 'three/examples/jsm/libs/stats.module.js'
 
-import { Sun } from './Sun.js';
-import { Snow } from './Snow.js';
-import { Tube } from './Tube.js';
-import { Light } from './Light.js';
-import { Curve } from './Curve.js';
-import { Bar3d } from './Bar3d.js';
-import { Pie3d1 } from './Pie3d1.js';
-import { Pie3d2 } from './Pie3d2.js';
-import { Ocean1 } from './Ocean1.js';
-import { Ocean2 } from './Ocean2.js';
-import { Axis3d } from './Axis3d.js';
-import { Effect } from './Effect.js';
-import { Cameras } from './Camera.js';
-import { Controls } from './Controls.js';
-import { MatrixAxis } from './Matrix.js';
-import { Raycaster } from './Raycaster.js';
-import { SphereSky } from './SphereSky.js';
-import { Lensflares } from './Lensflare.js';
-import { Polyline3d } from './Polyline3d.js';
-import { SpriteLabel } from "./SpriteLabel.js";
+import { Sun } from './Sun';
+import { Snow } from './Snow';
+import { Tube } from './Tube';
+import { Light } from './Light';
+import { Curve } from './Curve';
+import { Bar3d } from './Bar3d';
+import { Pie3d1 } from './Pie3d1';
+import { Pie3d2 } from './Pie3d2';
+import { Ocean1 } from './Ocean1';
+import { Ocean2 } from './Ocean2';
+import { Axis3d } from './Axis3d';
+import { Effect } from './Effect';
+import { Cameras } from './Camera';
+import { Controls } from './Controls';
+import { MatrixAxis } from './Matrix';
+import { Raycaster } from './Raycaster';
+import { SphereSky } from './SphereSky';
+import { Lensflares } from './Lensflare';
+import { Polyline3d } from './Polyline3d';
+import { SpriteLabel } from "./SpriteLabel";
 
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
-import type { ChartData, LensflareConfig } from './types/index';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 
 import { SunInterface } from './interface/Sun';
@@ -53,20 +53,21 @@ export default class THREEHelper {
     domElement: THREEHELPER.Canvas;
     width: THREEHELPER.CanvasSize;
     height: THREEHELPER.CanvasSize;
-    sun: SunInterface;
-    scene: THREE.Scene;
-    camera: THREE.PerspectiveCamera;
-    cameras: CamerasInterface;
-    renderer: THREE.WebGLRenderer;
+    sun?: SunInterface;
+    scene!: THREE.Scene; // 不要反驳我
+    camera!: THREE.PerspectiveCamera;
+    cameras!: CamerasInterface;
+    renderer!: THREE.WebGLRenderer;
     gui: any; // 尝试用decalre解决该问题
-    light: LightInterface;
-    controls: ControlsInterface;
-    control: AnyControls;
-    points: SnowInterface;
-    raycaster: RaycasterInterface;
-    ocean: (Ocean2Interface | Ocean1Interface);
-    effect: EffectInterface;
-    lensflares: LensflareInterface;
+    light!: LightInterface;
+    controls!: ControlsInterface;
+    control!: AnyControls;
+    points?: SnowInterface;
+    raycaster?: RaycasterInterface;
+    ocean?: (Ocean2Interface | Ocean1Interface);
+    effect?: EffectInterface;
+    lensflares?: LensflareInterface;
+    stats?: Stats;
     constructor(selector: string) {
         this.isDayTime = false;
         this.curveMap = new Map();
@@ -86,7 +87,7 @@ export default class THREEHelper {
     */
     init() {
         this.initScene();
-        this.initCamera(75, 1, 1000);
+        this.initCamera();
         this.initRenderer();
         this.initControl();
         this.initEffect();
@@ -111,6 +112,14 @@ export default class THREEHelper {
     }
 
     /* 
+        * @description 帧率检测
+    */
+    addStats() {
+        this.stats = new Stats();
+        document.body.appendChild(this.stats.dom);
+    }
+
+    /* 
         * @description 添加Object3D到场景
         * @param {Array} Object3D
     */
@@ -132,7 +141,7 @@ export default class THREEHelper {
         * @param {Number} min 极近点
         * @param {Number} max 极远点
     */
-    initCamera(fov: number = 75, near: number = 1, far: number = 10000) {
+    initCamera(fov: number = 75, near: number = 1, far: number = 1000) {
         this.cameras = new Cameras(fov, near, far);
         this.camera = this.cameras.camera;
         this.camera.aspect = this.width / this.height;
@@ -274,7 +283,7 @@ export default class THREEHelper {
         * @param {Boolean} help 是否检视所有名称
         * @return {Light} 光
     */
-    getLight(name, help = false) {
+    getLight(name: string, help = false) {
         help && console.warn(this.light.check());
         return this.light.get(name);
     }
@@ -370,7 +379,9 @@ export default class THREEHelper {
             this.updateVertex();
         }
 
-        this.effect.effectComposer.render(delta);
+        this.effect && this.effect.effectComposer.render(delta);
+
+        this.stats && this.stats.update();
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.render.bind(this));
     }
@@ -379,7 +390,7 @@ export default class THREEHelper {
         * @description 更新雪模块
     */
     updateVertex() {
-        let vertices = this.points.mesh.geometry.attributes.position.array;
+        let vertices = this.points!.mesh.geometry.attributes.position.array;
 
         // 1, 4, 7, 10, 13, 16
         for (let i = 1; i < vertices.length; i += 3) { // y
@@ -394,7 +405,7 @@ export default class THREEHelper {
         }
 
         // 顶点变动之后需要更新
-        this.points.mesh.geometry.attributes.position.needsUpdate = true;;
+        this.points!.mesh.geometry.attributes.position.needsUpdate = true;;
     }
 
     /* 
@@ -418,7 +429,7 @@ export default class THREEHelper {
 
                 const actions = {};
                 for (let i = 0; i < gltf.animations.length; i++) {
-                    actions[`${gltf.animations[i].name}Action`] = mixer.clipAction(gltf.animations[i]);
+                    (actions as any)[`${gltf.animations[i].name}Action`] = mixer.clipAction(gltf.animations[i]);
                 }
 
                 (gltf as any).actions = actions;
@@ -439,7 +450,7 @@ export default class THREEHelper {
         * @param {String} path 引导至图片所在
         * @Promise {Texture} texture 图像纹理
     */
-    textureLoader(path) {
+    textureLoader(path: string) {
         const loader = new THREE.TextureLoader();
         return new Promise((resolve, reject) => {
             loader.load(path, (texture) => {
@@ -523,7 +534,7 @@ export default class THREEHelper {
     setBackgroundHDR(url: string) {
         return new Promise((resolve, reject) => {
             this.hdrLoader(url).then((texture: any) => { // 此处类型或许可以明确
-                texture.anisotropy = 16;
+                texture.anisotropy = 15;
                 this.scene.background = texture;
                 this.scene.environment = texture;
                 texture.format = THREE.RGBAFormat;
@@ -546,6 +557,10 @@ export default class THREEHelper {
         * @description 启用抗锯齿后期
     */
     addAntialias() {
+        if (!this.effect) {
+            console.warn('未对效果模块进行初始化');
+            return;
+        }
         this.effect.antialias();
     }
 
@@ -553,6 +568,10 @@ export default class THREEHelper {
         * @description 启用柯里化后期
     */
     addDotScreen(center: THREE.Vector2 = new THREE.Vector2(0, 0), angel: number = 0.5, scale: number = 0.5) {
+        if (!this.effect) {
+            console.warn('未对效果模块进行初始化');
+            return;
+        }
         this.effect.dotScreen(center, angel, scale);
     }
 
@@ -560,6 +579,10 @@ export default class THREEHelper {
         * @description 启用泛光后期
     */
     addUnrealBloom(resolution: THREE.Vector2 = new THREE.Vector2(0, 0), strength: number = 0.3, radius: number = 2, threshold: number = 0.1) {
+        if (!this.effect) {
+            console.warn('未对效果模块进行初始化');
+            return;
+        }
         this.effect.unrealBloom(resolution, strength, radius, threshold);
     }
 
@@ -567,6 +590,10 @@ export default class THREEHelper {
         * @description 启用像素化后期
     */
     addPixel(intensity: number = 4) {
+        if (!this.effect) {
+            console.warn('未对效果模块进行初始化');
+            return;
+        }
         this.effect.pixel(intensity);
     }
 
@@ -574,6 +601,10 @@ export default class THREEHelper {
         * @description 启用干扰后期
     */
     addGlitch(keep: number) {
+        if (!this.effect) {
+            console.warn('未对效果模块进行初始化');
+            return;
+        }
         this.effect.glitch(keep);
     }
 
@@ -581,6 +612,10 @@ export default class THREEHelper {
         * @description 启用电影后期
     */
     addFilm(nIntensity: number = 0.8, sIntensity: number = 0.35, sCount: number = 250, grayscale: boolean = false) {
+        if (!this.effect) {
+            console.warn('未对效果模块进行初始化');
+            return;
+        }
         this.effect.film(nIntensity, sIntensity, sCount, grayscale);
     }
 
@@ -588,6 +623,10 @@ export default class THREEHelper {
         * @description 启用屏幕空间反射后期
     */
     addSSR(size: THREE.Vector2 = new THREE.Vector2(10, 10), color: number = 0x888888) {
+        if (!this.effect) {
+            console.warn('未对效果模块进行初始化');
+            return;
+        }
         this.effect.ssr(size, color);
     }
 
@@ -620,7 +659,7 @@ export default class THREEHelper {
         * @description 添加坐标轴
         * @params {Number} size 三轴线长度
     */
-    addAxis(size = 10) {
+    addAxis(size = 100) {
         let axis = new THREE.AxesHelper(size);
         this.scene.add(axis);
     }
@@ -637,6 +676,10 @@ export default class THREEHelper {
         * @params {Array} RaycasterMeshes 能够被射线拾取的物体
     */
     setRaycasterMeshes(RaycasterMeshes: THREE.Mesh[]) {
+        if (!this.raycaster) {
+            console.warn('未对效果射线拾取模块进行初始化');
+            return;
+        }
         this.raycaster.setMeshArr(RaycasterMeshes);
     }
 
@@ -645,6 +688,10 @@ export default class THREEHelper {
         * @params {Function} callback 拾取之后回调
     */
     createClickRaycaster(callback: (intersects: THREE.Intersection<THREE.Object3D<THREE.Event>>[]) => any) {
+        if (!this.raycaster) {
+            console.warn('未对效果射线拾取模块进行初始化');
+            return;
+        }
         this.raycaster.createClickRaycaster(callback);
     }
 
@@ -653,6 +700,10 @@ export default class THREEHelper {
         * @params {Function} callback 拾取之后回调
     */
     createHoverRaycaster(callback: (intersects: THREE.Intersection<THREE.Object3D<THREE.Event>>[]) => any) {
+        if (!this.raycaster) {
+            console.warn('未对效果射线拾取模块进行初始化');
+            return;
+        }
         this.raycaster.createHoverRaycaster(callback);
     }
 
@@ -700,7 +751,11 @@ export default class THREEHelper {
         * @params {String} name 名称
         * @return {Lensflares} 光晕
     */
-    createLensflare(configArr: LensflareConfig[] = [], name?: string) {
+    createLensflare(configArr: THREEHELPER.LensflareConfig[] = [], name?: string) {
+        if (!this.lensflares) {
+            console.warn('未对效果射线拾取模块进行初始化');
+            return;
+        }
         const lensflare: LensflareToolInterface = this.lensflares.create(configArr, name);
         return lensflare;
     }
@@ -711,6 +766,10 @@ export default class THREEHelper {
         * @return {Lensflares} 光晕
     */
     getLensflare(name: string): (LensflareToolInterface | void) {
+        if (!this.lensflares) {
+            console.warn('未对效果射线拾取模块进行初始化');
+            return;
+        }
         const lensflare = this.lensflares.get(name);
         return lensflare;
     }
@@ -731,20 +790,24 @@ export default class THREEHelper {
         * @description 太阳公转启用
     */
     sunTrack() { // Sun运动
+        if (!this.sun) {
+            console.warn('未对Sun模块做初始化');
+            return;
+        }
         gsap.to(this.moment, {
             value: 24,
             duration: 24,
             repeat: -1,
             ease: "linear",
             onUpdate: () => {
-                this.sun.mesh.position.z = Math.cos(((this.moment.value - 6) * 2 * Math.PI) / 24) * 4000;
-                this.sun.mesh.position.y = Math.sin(((this.moment.value - 6) * 2 * Math.PI) / 24) * 4000;
+                this.sun!.mesh.position.z = Math.cos(((this.moment.value - 6) * 2 * Math.PI) / 24) * 4000;
+                this.sun!.mesh.position.y = Math.sin(((this.moment.value - 6) * 2 * Math.PI) / 24) * 4000;
 
                 if (this.moment.value > 6) { // 早6
-                    this.sun.mesh.visible = true;
+                    this.sun!.mesh.visible = true;
                 }
                 if (this.moment.value > 18) { // 晚6
-                    this.sun.mesh.visible = false;
+                    this.sun!.mesh.visible = false;
                 }
             },
         });
@@ -755,7 +818,7 @@ export default class THREEHelper {
         * @params {Function} dayCallback 昼调用
         * @params {Function} nightCallback 夜调用
     */
-    dayLight(dayCallback, nightCallback) {
+    dayLight(dayCallback: Function, nightCallback: Function) {
         gsap.to(this.moment, {
             value: 24,
             duration: 24,
@@ -812,8 +875,12 @@ export default class THREEHelper {
         * @params {Number} bottom 纵轴起始位置
         * @params {Number} left 横轴起始位置
     */
-    addAxis3d(category, bottom, left, size) {
-        let axis3d = new Axis3d(category, bottom, left, size);
+    addAxis3d(category?: string[][], bottom: number = 0, left: number = 0, size: THREE.Vector3 = new THREE.Vector3(8, 6, 4)) {
+        const examples: string[][] = [
+            ["0%", "20%", "40%", "60%", "80%", "100%"],
+            ["line0", "line1", "line2", "line3", "line4"]
+        ]
+        let axis3d = new Axis3d(category || examples, bottom, left, size);
         this.scene.add(axis3d.mesh);
         return axis3d;
     }
@@ -825,8 +892,26 @@ export default class THREEHelper {
         * @params {String} type 圆柱cylinder, 四棱柱rect
         * @return {Group} bar3d 柱形图
     */
-    addBar3d(data, space, type) { // 柱形图
-        let bar3d = new Bar3d(data, space, type);
+    addBar3d(data?: THREEHELPER.ChartData[], space: number = 1, type: THREEHELPER.BarType = 'cylinder') { // 柱形图
+        const chartData = data || [
+            {
+                name: '第一季度',
+                value: 2,
+            },
+            {
+                name: '第二季度',
+                value: 4,
+            },
+            {
+                name: '第三季度',
+                value: 6,
+            },
+            {
+                name: '第四季度',
+                value: 8,
+            }
+        ];
+        let bar3d = new Bar3d(chartData, space, type);
         this.scene.add(bar3d.mesh);
         return bar3d;
     }
@@ -837,7 +922,7 @@ export default class THREEHelper {
         * @params {Number} depth 各部分间高度差
         * @return {Group} pie3d1 饼图1
     */
-    addPie3d1(data: ChartData[], depth = 2) { // 饼图1
+    addPie3d1(data?: THREEHELPER.ChartData[], radius: number = 3, depth: number = 2) { // 饼图1
         const chartData = data || [
             {
                 name: '第一季度',
@@ -856,7 +941,7 @@ export default class THREEHelper {
                 value: 8,
             }
         ];
-        let pie3d1 = new Pie3d1(chartData, this.camera, depth);
+        let pie3d1 = new Pie3d1(chartData, this.camera, radius, depth);
         this.scene.add(pie3d1.mesh);
         return pie3d1;
     }
@@ -867,7 +952,7 @@ export default class THREEHelper {
         * @params {Array} thickness 厚度
         * @return {Group} pie3d1 饼图1
     */
-    addPie3d2(data: ChartData[], thickness = 1) { // 饼图2
+    addPie3d2(data: THREEHELPER.ChartData[], radius: number = 3, thickness: number = 1) { // 饼图2
         const chartData = data || [
             {
                 name: '第一季度',
@@ -886,7 +971,7 @@ export default class THREEHelper {
                 value: 8,
             }
         ];
-        let pie3d2 = new Pie3d2(chartData, this.camera, thickness);
+        let pie3d2 = new Pie3d2(chartData, this.camera, radius, thickness);
         this.scene.add(pie3d2.mesh);
         return pie3d2;
     }
@@ -897,7 +982,7 @@ export default class THREEHelper {
         * @params {Number} space 项之间间隔
         * @return {Group} pie3d1 折线图
     */
-    addPolyline3d(data: ChartData[], space: number = 1) {
+    addPolyline3d(data?: THREEHELPER.ChartData[], space: number = 1) {
         const chartData = data || [
             {
                 name: '第一季度',
@@ -928,7 +1013,7 @@ export default class THREEHelper {
        * @params {Texture} texture 图像纹理
        * @return {Mesh} 雪区
    */
-    addSnow(geometry: THREE.BufferGeometry, color: number, texture: THREE.Texture) {
+    addSnow(geometry?: THREE.BufferGeometry, color?: number, texture?: THREE.Texture) {
         this.points = new Snow(geometry, color, texture);
         this.scene.add(this.points.mesh);
         return this.points;
@@ -940,8 +1025,8 @@ export default class THREEHelper {
         * @params {Number} density 密度
         * @params {Texture} texture 图像纹理(非必需) // 这不合理, 这个类和snow一样在不传参数的情况下可以生成一些东西, 但这些参数都是必选参数
     */
-    addMatrixAxis(space: number = 10, density: number = 11, geometry: THREE.BufferGeometry, texture: THREE.Texture) {
-        const matrixAxis = new MatrixAxis(space, density, geometry, texture);
+    addMatrixAxis(space: number = 10, density: number = 11, geometry?: THREE.BufferGeometry) {
+        const matrixAxis = new MatrixAxis(space, density, geometry);
         this.scene.add(matrixAxis.mesh);
     }
 
@@ -1001,22 +1086,22 @@ export default class THREEHelper {
         * @params {Mesh/gltf} 物体或gltf 
         * @params {Boolean} helper Box3视觉辅助
     */
-    addBox3(model, helper = false) { // 为一个模型添加box3
-        model.box3 = new THREE.Box3();
-        if (model.scene) {
-            model.scene.traverse((node) => {
-                if (node.isSkinnedMesh) {
+    addBox3(model: (THREE.Mesh | GLTF), helper = false) { // 为一个模型添加box3
+        (model as any).box3 = new THREE.Box3();
+        if (model.hasOwnProperty('scene')) {
+            (model as GLTF).scene.traverse((node) => {
+                if (node.hasOwnProperty('isSkinnedMesh')) {
                     const mesh = node;
                     node.frustumCulled = false;
-                    mesh.geometry.computeBoundingBox();
-                    model.box3.union(mesh.geometry.boundingBox);
+                    (mesh as any).geometry.computeBoundingBox();
+                    (model as GLTF & { box3: THREE.Box3 }).box3.union((mesh as any).geometry.boundingBox);
                 }
             })
         } else {
-            model.box3.setFromObject(model);
+            (model as THREE.Mesh & { box3: THREE.Box3 }).box3.setFromObject((model as THREE.Mesh & { box3: THREE.Box3 }));
         }
         if (helper) {
-            const box3Helper = new THREE.Box3Helper(model.box3, new THREE.Color(0xffff00));
+            const box3Helper = new THREE.Box3Helper((model as THREE.Mesh & { box3: THREE.Box3 } | GLTF & { box3: THREE.Box3 }).box3, new THREE.Color(0xffff00));
             this.scene.add(box3Helper);
         }
         return model;
@@ -1027,7 +1112,7 @@ export default class THREEHelper {
         * @params {Mesh/gltf} 物体或gltf
         * @return {Boolean} 交集与否
     */
-    collideDetect(mesh0, mesh1) {
+    collideDetect(mesh0: THREE.Mesh & { box3: THREE.Box3 }, mesh1: THREE.Mesh & { box3: THREE.Box3 }) {
         if (!mesh0.box3 || !mesh1.box3) {
             console.warn('collideDetect: Box3 needed.')
             return;

@@ -9,14 +9,14 @@ export const Ocean1: Ocean1ContructorInterface = class Ocean1 implements Ocean1I
     density: number;
     color: number;
     mesh: WaterType;
-    flowTexture: THREE.Texture;
+    flowTexture?: THREE.Texture;
     velocity: number;
     constructor(flowTexturePath: string, x: number, y: number, density: number, color: number) {
         this.x = x;
         this.y = y;
-        this.density = density;
-        this.velocity = 2.0;
         this.color = color;
+        this.velocity = 2.0;
+        this.density = density;
 
         if (flowTexturePath) {
             const loader = new THREE.TextureLoader();
@@ -29,20 +29,20 @@ export const Ocean1: Ocean1ContructorInterface = class Ocean1 implements Ocean1I
         this.mesh = new Water(oceanGeometry, {
             textureWidth: this.density, // 浑浊程度(密度)
             textureHeight: this.density, // 浑浊程度(密度)
-            waterNormals: this.flowTexture,
+            waterNormals: this.flowTexture!,
             waterColor: this.color
         });
         this.mesh.rotation.x = Math.PI * -0.5;
     }
 
-    setFlowTexture(flowTexturePath) {
+    setFlowTexture(flowTexturePath: string) {
         const loader = new THREE.TextureLoader();
         (this.mesh! as any).waterNormals = loader.load(flowTexturePath, (texture) => {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         })
     }
 
-    setColor(color) {
+    setColor(color: number) {
         (this.mesh! as any).waterColor = color;
     }
 

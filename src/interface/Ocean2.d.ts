@@ -6,7 +6,7 @@ export interface Ocean2Interface { // 实例约束
     density: number;
     color: number;
     mesh: WaterType;
-    flowTexture: THREE.Texture;
+    flowTexture?: THREE.Texture;
     setFlowTexture: (flowTexturePath: string) => void;
     setColor: (color: number) => void;
     waterTexture: () => boolean;

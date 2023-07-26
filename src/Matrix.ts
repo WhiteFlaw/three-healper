@@ -2,9 +2,9 @@ import * as THREE from 'three';
 import { MatrixInterface, MatrixContructorInterface } from './interface/Matrix';
 
 export const MatrixAxis: MatrixContructorInterface = class MatrixAxis implements MatrixInterface {
-    context: CanvasRenderingContext2D | null;
+    context?: CanvasRenderingContext2D | null;
     mesh: THREE.Points;
-    constructor(space: number, density: number, geometry: THREE.BufferGeometry, texture: THREE.Texture) {
+    constructor(space: number, density: number, geometry?: THREE.BufferGeometry) {
         const particleGeometry = geometry || new THREE.BufferGeometry();
 
         if (density % 2 === 0) {
@@ -30,23 +30,21 @@ export const MatrixAxis: MatrixContructorInterface = class MatrixAxis implements
 
         const material = new THREE.PointsMaterial();
 
-        if (!texture) {
-            const canvas = document.createElement("canvas");
-            canvas.width = 1024;
-            canvas.height = 1024;
-            this.context = canvas.getContext("2d");
-            this.context!.textAlign = "center";
-            this.context!.textBaseline = "middle";
-            this.context!.font = "bold 1200px Arial";
-            this.context!.fillStyle = "rgba(255, 255, 255, 1)";
-            this.context!.fillRect(0, 256, 1024, 512);
-            this.context!.fillText('+', canvas.width / 2, canvas.height / 2);
+        const canvas = document.createElement("canvas");
+        canvas.width = 1024;
+        canvas.height = 1024;
+        this.context = canvas.getContext("2d");
+        this.context!.fillRect(0, 256, 1024, 512); // 顺序不要搞错
+        this.context!.textAlign = "center";
+        this.context!.textBaseline = "middle";
+        this.context!.font = "bold 1200px Arial";
+        this.context!.fillStyle = "rgba(255, 255, 255, 1)";
+        this.context!.fillText('+', canvas.width / 2, canvas.height / 2);
 
-            let texture = new THREE.CanvasTexture(canvas);
+        let texture = new THREE.CanvasTexture(canvas);
 
-            material.map = texture;
-            material.alphaMap = texture;
-        }
+        material.map = texture;
+        material.alphaMap = texture;
         material.size = 1;
         material.sizeAttenuation = true;
         material.transparent = true;
