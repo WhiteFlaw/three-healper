@@ -5,46 +5,46 @@ import type { ChartData } from './types/index';
 import { Pie3d1Interface, Pie3d1ContructorInterface } from './interface/Pie3d1';
 
 export const Pie3d1: Pie3d1ContructorInterface = class Pie3d1 implements Pie3d1Interface {
-    sum: number;
+    total: number;
     camera: THREE.PerspectiveCamera;
     mesh: THREE.Group;
-    raycaster: THREE.Raycaster;
-    mouse: THREE.Vector2;
+    raycaster?: THREE.Raycaster; // 这种参数在某个非必调方法中定义, 可能在实例化后并不存在, 需要标可选
+    mouse?: THREE.Vector2;
     timeline: any;
-    currentModule: THREE.Object3D<THREE.Event> | null;
-    constructor(data: ChartData[], camera: THREE.PerspectiveCamera, depth: number) {
-        const chartData = data;
-        this.sum = 0;
+    currentModule: THREE.Object3D | null;
+    constructor(data: ChartData[], camera: THREE.PerspectiveCamera, radius: number, thickness: number) {
+        this.total = 0;
         this.camera = camera;
         this.mesh = new THREE.Group();
+        this.currentModule = null;
 
         let sumRotation = 0;
 
-        chartData.forEach((item) => {
-            this.sum += item.value;
+        data.forEach((item) => {
+            this.total += item.value;
         })
 
-        chartData.forEach((item) => {
-            let rotation = (item.value / this.sum) * 2 * Math.PI; // 占据角度值
+        data.forEach((item) => {
+            let rotation = (item.value / this.total) * 2 * Math.PI; // 占据角度值
 
             const shape = new THREE.Shape();
             shape.moveTo(0, 0);
             // 先把扇形一边贴向xz平面, 然后扇形边用while画, 每次画一边, 角度增加0.05
-            let rad = 0;
-            while (rad < rotation) {
-                shape.lineTo(3 * Math.cos(rad), 3 * Math.sin(rad));
-                rad += 0.05;
+            let angle = 0;
+            while (angle < rotation) {
+                shape.lineTo(radius * Math.cos(angle), radius * Math.sin(angle));
+                angle += 0.05;
             }
             // x轴为平面, 线极远点y为: 线长 * sin(角度);
             // x轴为平面, 线极远点x为: 线长 * cos(角度);
             // 最后扇形边在最终旋转值处结束
-            shape.lineTo(3 * Math.cos(rotation), 3 * Math.sin(rotation));
+            shape.lineTo(radius * Math.cos(rotation), radius * Math.sin(rotation));
             // 连接到原点封口
             shape.lineTo(0, 0);
 
             const extrudeSettings = {
                 steps: 1,
-                depth: (item.value / this.sum) * depth,
+                depth: (item.value / this.total) * thickness,
                 bevelEnabled: false,
                 bevelThickness: 1,
                 bevelSize: 1,
@@ -54,7 +54,7 @@ export const Pie3d1: Pie3d1ContructorInterface = class Pie3d1 implements Pie3d1I
 
             let color = new THREE.Color(Math.random() * 0xffffff);
 
-            const material = new THREE.MeshStandardMaterial({
+            const material = new THREE.MeshBasicMaterial({
                 color: color,
                 opacity: 0.8,
                 transparent: true,
@@ -68,9 +68,9 @@ export const Pie3d1: Pie3d1ContructorInterface = class Pie3d1 implements Pie3d1I
             this.mesh.add(cylinder);
 
             let textPosition = new THREE.Vector3(
+                Math.cos(rotation / 3) * radius,
                 Math.sin(rotation) * 1.5,
-                Math.cos(rotation) * 1.5,
-                item.value / 2 + 0.5
+                (item.value / this.total) * thickness + 0.7
             )
 
             let spriteText = new SpriteText(item.name, textPosition);
@@ -80,41 +80,43 @@ export const Pie3d1: Pie3d1ContructorInterface = class Pie3d1 implements Pie3d1I
         })
 
         this.mesh.rotation.x = -Math.PI / 2;
-        // this.addMouseHover();
+        this.addMouseHover();
     }
 
     addMouseHover() {
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2(1, 1);
         this.timeline = gsap.timeline();
-        this.currentModule = null;
-
         window.addEventListener('mousemove', (event) => {
-            this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            this.mouse.y = - (event.clientY / (1080 * (window.innerWidth / 1920))) * 2 + 1;
+            this.mouse!.x = (event.clientX / window.innerWidth) * 2 - 1;
+            this.mouse!.y = - (event.clientY / window.innerHeight) * 2 + 1;
+            this.update();
         })
+
     }
 
     update() {
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        const intersects = this.raycaster.intersectObjects(
+        this.raycaster!.setFromCamera(this.mouse!, this.camera);
+        const intersects = this.raycaster!.intersectObjects(
             this.mesh.children,
             false
         );
+
         if (
             intersects.length > 0 &&
-            this.currentModule == null &&
-            this.currentModule != intersects[0].object &&
-            this.timeline.isActive()
+            this.currentModule !== intersects[0].object
         ) {
-            this.timeline.to(this.currentModule!.position, {
-                x: 0,
-                y: 0,
-                duration: 0.1
-            })
+            if (this.currentModule !== null) {
+                this.timeline.to(this.currentModule!.position, { // 旧模块返回
+                    x: 0,
+                    y: 0,
+                    duration: 0.1
+                })
+            }
 
             this.currentModule = intersects[0].object;
-            this.timeline.to(this.currentModule.position, {
+
+            this.timeline.to(this.currentModule.position, { // 新模块弹出
                 x: Math.cos(this.currentModule.rotation.z),
                 y: Math.sin(this.currentModule.rotation.z),
                 duration: 0.5
@@ -123,7 +125,7 @@ export const Pie3d1: Pie3d1ContructorInterface = class Pie3d1 implements Pie3d1I
 
         if (
             intersects.length === 0 &&
-            this.currentModule &&
+            this.currentModule !== null &&
             !this.timeline.isActive()
         ) {
             this.timeline.to(this.currentModule.position, {

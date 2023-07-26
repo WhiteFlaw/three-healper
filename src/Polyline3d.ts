@@ -42,7 +42,7 @@ export const Polyline3d: PolyLine3dContructorInterface = class Polyline3d implem
             bevelSegments: 5
         };
 
-        const material = new THREE.MeshStandardMaterial({
+        const material = new THREE.MeshBasicMaterial({
             color: color,
             opacity: 1,
             transparent: true,

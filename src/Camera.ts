@@ -8,7 +8,9 @@ export const Cameras: CamerasContructorInterface = class Cameras implements Came
     constructor(fov: number, near: number, far: number) {
         this.cameraMap = new Map();
         this.camera = this.addPerspectiveCamera(fov, near, far);
+        this.rePos(new THREE.Vector3(0, 0, 100)); // 这里一定要重定位, 相机在000会导致轨道控制器失效
         this.cameraMap.set('default', this.camera);
+        this.activeCamera('default');
     }
 
     rePos(pos: THREE.Vector3): void {

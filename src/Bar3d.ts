@@ -1,37 +1,17 @@
 import * as THREE from 'three';
-import { SpriteText } from './SpriteText.js';
-import type { ChartData, BarType } from './types/index.js';
+import { SpriteText } from './SpriteText';
+import type { ChartData, BarType } from './types/index';
 import { Bar3dInterface, Bar3dContructorInterface } from './interface/Bar3d';
-
-let dataExamples: ChartData[] = [
-    {
-        value: 3.5,
-        name: '第一季度',
-    },
-    {
-        value: 3.0,
-        name: '第二季度',
-    },
-    {
-        value: 2.5,
-        name: '第三季度',
-    },
-    {
-        value: 2.0,
-        name: '第四季度',
-    },
-]
 
 export const Bar3d: Bar3dContructorInterface = class Bar3d implements Bar3dInterface {
     mesh: THREE.Group;
-    constructor(data: ChartData[], space: number = 1, type: BarType = 'cylinder') { // cylinder圆柱体, rect矩形
-        const chartData = data || dataExamples;
+    constructor(data: ChartData[], space: number, type: BarType) { // cylinder圆柱体, rect矩形
         this.mesh = new THREE.Group();
 
-        chartData.forEach((item, index) => {
+        data.forEach((item, index) => {
             let color = new THREE.Color(Math.random() * 0xffffff);
 
-            let material = new THREE.MeshStandardMaterial({
+            let material = new THREE.MeshBasicMaterial({
                 color: color,
                 transparent: true,
                 opacity: 0.8

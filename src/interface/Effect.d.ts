@@ -7,8 +7,8 @@ export interface EffectInterface { // 实例约束
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
     effectComposer: EffectComposerType;
-    unrealBloomPass: UnrealBloomPassType;
-    groundReflector: ReflectorForSSRPassType;
+    unrealBloomPass?: UnrealBloomPassType;
+    groundReflector?: ReflectorForSSRPassType;
     antialias: () => void;
     dotScreen: (center: THREE.Vector2, angel: number, scale: number) => void;
     unrealBloom: (resolution: THREE.Vector2, strength: number, radius: number, threshold: number) => void;

@@ -8,7 +8,7 @@ import type { FirstPersonControls as FirstPersonControlsType } from 'three/examp
 import { AnyControls, ControlsInterface, ControlsContructorInterface } from './interface/Controls';
 
 export const Controls: ControlsContructorInterface = class Controls implements ControlsInterface {
-    controls: AnyControls;
+    controls!: AnyControls; // 我!激!活!了!
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
     controlsMap: Map<string, AnyControls>;
